@@ -1,26 +1,31 @@
-import { 
-  FETCH_DOCTORS, 
-  ADD_DOCTOR, 
-  UPDATE_DOCTOR, 
-  DELETE_DOCTOR 
-} from './types';
+import { DOCTOR_TYPES } from '../types/doctorTypes';
 
 export const fetchDoctors = (doctors) => ({
-  type: FETCH_DOCTORS,
+  type: DOCTOR_TYPES.FETCH_DOCTORS,
   payload: doctors
 });
 
 export const addDoctor = (doctor) => ({
-  type: ADD_DOCTOR,
-  payload: doctor
+  type: DOCTOR_TYPES.ADD_DOCTOR,
+  payload: { ...doctor, id: Date.now() }
 });
 
 export const updateDoctor = (doctor) => ({
-  type: UPDATE_DOCTOR,
+  type: DOCTOR_TYPES.UPDATE_DOCTOR,
   payload: doctor
 });
 
 export const deleteDoctor = (id) => ({
-  type: DELETE_DOCTOR,
+  type: DOCTOR_TYPES.DELETE_DOCTOR,
   payload: id
+});
+
+export const setLoading = (status) => ({
+  type: DOCTOR_TYPES.SET_LOADING,
+  payload: status
+});
+
+export const setError = (error) => ({
+  type: DOCTOR_TYPES.SET_ERROR,
+  payload: error
 }); 

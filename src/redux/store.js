@@ -1,32 +1,15 @@
-import { createStore, applyMiddleware, compose } from 'redux';
-import rootReducer from './reducers';
+import { createStore, combineReducers } from 'redux';
+import { doctorReducer } from './reducers/doctorReducer';
+import { roomReducer } from './reducers/roomReducer';
+import { medicamentReducer } from './reducers/medicamentReducer';
 
-const initialState = {};
+const rootReducer = combineReducers({
+  doctor: doctorReducer,
+  room: roomReducer,
+  medicament: medicamentReducer
+});
 
-const asyncMiddleware = store => next => action => {
-  if (typeof action === 'function') {
-    return action(store.dispatch, store.getState);
-  }
-  return next(action);
-};
-
-const middleware = [asyncMiddleware];
-
-let store;
-
-if (typeof window !== 'undefined') {
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-  store = createStore(
-    rootReducer,
-    initialState,
-    composeEnhancers(applyMiddleware(...middleware))
-  );
-} else {
-  store = createStore(
-    rootReducer,
-    initialState,
-    applyMiddleware(...middleware)
-  );
-}
-
-export default store; 
+export const store = createStore(
+  rootReducer,
+  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+);

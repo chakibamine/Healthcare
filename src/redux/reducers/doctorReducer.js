@@ -1,9 +1,4 @@
-import { 
-  FETCH_DOCTORS, 
-  ADD_DOCTOR, 
-  UPDATE_DOCTOR, 
-  DELETE_DOCTOR 
-} from '../actions/types';
+import { DOCTOR_TYPES } from '../types/doctorTypes';
 
 const initialState = {
   doctors: [],
@@ -11,32 +6,52 @@ const initialState = {
   error: null
 };
 
-export default function doctorReducer(state = initialState, action) {
+export const doctorReducer = (state = initialState, action) => {
   switch (action.type) {
-    case FETCH_DOCTORS:
+    case DOCTOR_TYPES.FETCH_DOCTORS:
       return {
         ...state,
         doctors: action.payload,
         loading: false
       };
-    case ADD_DOCTOR:
+
+    case DOCTOR_TYPES.ADD_DOCTOR:
       return {
         ...state,
-        doctors: [...state.doctors, action.payload]
+        doctors: [...state.doctors, action.payload],
+        loading: false
       };
-    case UPDATE_DOCTOR:
+
+    case DOCTOR_TYPES.UPDATE_DOCTOR:
       return {
         ...state,
         doctors: state.doctors.map(doctor => 
           doctor.id === action.payload.id ? action.payload : doctor
-        )
+        ),
+        loading: false
       };
-    case DELETE_DOCTOR:
+
+    case DOCTOR_TYPES.DELETE_DOCTOR:
       return {
         ...state,
-        doctors: state.doctors.filter(doctor => doctor.id !== action.payload)
+        doctors: state.doctors.filter(doctor => doctor.id !== action.payload),
+        loading: false
       };
+
+    case DOCTOR_TYPES.SET_LOADING:
+      return {
+        ...state,
+        loading: action.payload
+      };
+
+    case DOCTOR_TYPES.SET_ERROR:
+      return {
+        ...state,
+        error: action.payload,
+        loading: false
+      };
+
     default:
       return state;
   }
-} 
+}; 

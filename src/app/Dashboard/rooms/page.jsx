@@ -1,5 +1,6 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import EntityTable from "@/Components/Custom/EntityTable";
 import AddRoomModal from './AddRoomModal';
 import ConfirmationModal from '@/Components/Custom/ConfirmationModal';
@@ -11,29 +12,46 @@ const initialRooms = [
 ];
 
 export default function RoomsPage() {
-  const [rooms, setRooms] = useState(initialRooms);
+  const dispatch = useDispatch();
+  const { rooms } = useSelector(state => state.room);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
   const [deletingRoom, setDeletingRoom] = useState(null);
 
+  useEffect(() => {
+    dispatch({ type: 'FETCH_ROOMS', payload: initialRooms });
+  }, [dispatch]);
+
   const handleAddRoom = (newRoom) => {
-    setRooms([...rooms, newRoom]);
+    dispatch({ 
+      type: 'ADD_ROOM', 
+      payload: { ...newRoom, id: Date.now() }
+    });
+    setIsModalOpen(false);
   };
 
   const handleEditRoom = (updatedRoom) => {
-    setRooms(rooms.map(room => 
-      room.id === updatedRoom.id ? updatedRoom : room
-    ));
+    dispatch({ 
+      type: 'UPDATE_ROOM', 
+      payload: updatedRoom 
+    });
     setEditingRoom(null);
+    setIsModalOpen(false);
   };
 
   const handleDeleteRoom = (roomId) => {
-    setDeletingRoom(rooms.find(room => room.id === roomId));
+    const roomToDelete = rooms.find(room => room.id === roomId);
+    setDeletingRoom(roomToDelete);
   };
 
   const confirmDelete = () => {
-    setRooms(rooms.filter(room => room.id !== deletingRoom.id));
-    setDeletingRoom(null);
+    if (deletingRoom) {
+      dispatch({ 
+        type: 'DELETE_ROOM', 
+        payload: deletingRoom.id 
+      });
+      setDeletingRoom(null);
+    }
   };
 
   return (
@@ -116,10 +134,10 @@ export default function RoomsPage() {
         isOpen={!!deletingRoom}
         onClose={() => setDeletingRoom(null)}
         onConfirm={confirmDelete}
-        title="Delete Room"
-        message={`Are you sure you want to delete ${deletingRoom?.nom}? This action cannot be undone.`}
-        confirmText="Delete Room"
-        cancelText="Cancel"
+        title="Supprimer une salle"
+        message={`Êtes-vous sûr de vouloir supprimer la salle ${deletingRoom?.nom} ?`}
+        confirmText="Supprimer"
+        cancelText="Annuler"
       />
     </div>
   );
