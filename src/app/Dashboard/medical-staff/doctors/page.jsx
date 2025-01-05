@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
 import EntityTable from "@/Components/Custom/EntityTable";
 import AddDoctorModal from './AddDoctorModal';
 import ConfirmationModal from '@/Components/Custom/ConfirmationModal';
@@ -9,46 +10,94 @@ import {
   fetchDoctors, 
   addDoctor, 
   updateDoctor, 
-  deleteDoctor 
+  deleteDoctor,
+  setLoading,
+  setError 
 } from '@/redux/actions/doctorActions';
 
-const initialDoctorsData = [
-  { id: 1, nom: "Dr. John Doe", specialite: "Cardiology", experience: 10, rating: 4.5 },
-  { id: 2, nom: "Dr. Jane Smith", specialite: "Neurology", experience: 15, rating: 4.8 },
-];
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DoctorsPage() {
   const dispatch = useDispatch();
-  const { doctors, loading, error } = useSelector(state => state);
+  const { doctors, loading, error } = useSelector(state => state.doctors || {});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDoctor, setEditingDoctor] = useState(null);
   const [deletingDoctor, setDeletingDoctor] = useState(null);
 
   useEffect(() => {
-    // Initialize with some data
-    dispatch(fetchDoctors(initialDoctorsData));
+    const fetchData = async () => {
+      dispatch(setLoading(true));
+      try {
+        const { data } = await axios.get(`${API_URL}/Doctors`);
+        dispatch(fetchDoctors(data));
+      } catch (err) {
+        dispatch(setError(err.message));
+      }
+    };
+
+    fetchData();
   }, [dispatch]);
 
-  const handleAddDoctor = (newDoctor) => {
-    dispatch(addDoctor(newDoctor));
+  const handleAddDoctor = async (newDoctor) => {
+    dispatch(setLoading(true));
+    try {
+      console.log('Sending doctor data:', newDoctor);
+      const { data } = await axios.post(`${API_URL}/Doctors`, newDoctor);
+      console.log('Received response:', data);
+      dispatch(addDoctor(data));
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      dispatch(setError(err.message));
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
-  const handleEditDoctor = (updatedDoctor) => {
-    dispatch(updateDoctor(updatedDoctor));
-    setEditingDoctor(null);
+  const handleEditDoctor = async (updatedDoctor) => {
+    dispatch(setLoading(true));
+    try {
+      console.log('Updating doctor:', updatedDoctor);
+      const { data } = await axios.put(`${API_URL}/Doctors/${updatedDoctor.id}`, updatedDoctor);
+      console.log('Server response:', data);
+      
+      // Update the store with the data returned from the server
+      dispatch(updateDoctor(data));
+      setEditingDoctor(null);
+      setIsModalOpen(false);
+    } catch (err) {
+      console.error('Error updating doctor:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      dispatch(setError(err.message));
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   const handleDeleteDoctor = (doctorId) => {
     setDeletingDoctor(doctors.find(doctor => doctor.id === doctorId));
   };
 
-  const confirmDelete = () => {
-    dispatch(deleteDoctor(deletingDoctor.id));
-    setDeletingDoctor(null);
+  const confirmDelete = async () => {
+    dispatch(setLoading(true));
+    try {
+      await axios.delete(`${API_URL}/Doctors/${deletingDoctor.id}`);
+      dispatch(deleteDoctor(deletingDoctor.id));
+      setDeletingDoctor(null);
+    } catch (err) {
+      dispatch(setError(err.message));
+    }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  if (error) return <div className="flex justify-center items-center min-h-screen text-red-500">Error: {error}</div>;
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 space-y-6">
@@ -132,4 +181,4 @@ export default function DoctorsPage() {
       />
     </div>
   );
-} 
+}

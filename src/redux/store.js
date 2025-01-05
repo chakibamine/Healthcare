@@ -1,15 +1,14 @@
 import { createStore, combineReducers } from 'redux';
-import { doctorReducer } from './reducers/doctorReducer';
-import { roomReducer } from './reducers/roomReducer';
-import { medicamentReducer } from './reducers/medicamentReducer';
+import doctorReducer from './reducers/doctorReducer';
 
 const rootReducer = combineReducers({
-  doctor: doctorReducer,
-  room: roomReducer,
-  medicament: medicamentReducer
+  doctors: doctorReducer,
+  // other reducers...
 });
 
-export const store = createStore(
+const store = createStore(
   rootReducer,
-  window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+  typeof window !== 'undefined' && window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
 );
+
+export default store;

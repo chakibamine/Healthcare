@@ -2,17 +2,17 @@
 import { useState } from "react";
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 
-export default function EntityTable({ data, columns, title, onEdit, onDelete }) {
+export default function EntityTable({ data , columns, title, onEdit, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const rowsPerPage = 5;
 
   // Filter data based on search
-  const filteredData = data.filter(item =>
+  const filteredData = data?.filter(item =>
     Object.values(item).some(value => 
-      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
-  );
+  ) || [];
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
@@ -25,6 +25,11 @@ export default function EntityTable({ data, columns, title, onEdit, onDelete }) 
 
   const goToNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handleEdit = (item) => {
+    console.log('Editing item:', item);
+    onEdit(item);
   };
 
   return (
@@ -69,7 +74,7 @@ export default function EntityTable({ data, columns, title, onEdit, onDelete }) 
                 <td className="p-4 border-b">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => onEdit(item)}
+                      onClick={() => handleEdit(item)}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                       title="Modifier"
                     >

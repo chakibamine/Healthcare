@@ -10,6 +10,7 @@ export default function AddDoctorModal({ isOpen, onClose, onSubmit, initialData 
     rating: ''
   });
 
+  // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
     if (initialData) {
       setDoctorData(initialData);
@@ -21,17 +22,23 @@ export default function AddDoctorModal({ isOpen, onClose, onSubmit, initialData 
         rating: ''
       });
     }
-  }, [initialData]);
+  }, [initialData, isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
-      ...doctorData,
-      experience: parseInt(doctorData.experience),
-      rating: parseFloat(doctorData.rating),
-      id: doctorData.id || Date.now()
-    });
-    onClose();
+    
+    // Create the formatted doctor data from the state
+    const formattedData = {
+      // If editing, include the id first
+      ...(initialData?.id && { id: initialData.id }),
+      nom: doctorData.nom,
+      specialite: doctorData.specialite,
+      experience: parseInt(doctorData.experience, 10),
+      rating: parseFloat(doctorData.rating)
+    };
+
+    // Submit the formatted data
+    onSubmit(formattedData);
   };
 
   if (!isOpen) return null;

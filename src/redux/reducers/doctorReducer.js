@@ -1,4 +1,11 @@
-import { DOCTOR_TYPES } from '../types/doctorTypes';
+import {
+  FETCH_DOCTORS,
+  ADD_DOCTOR,
+  UPDATE_DOCTOR,
+  DELETE_DOCTOR,
+  SET_LOADING,
+  SET_ERROR
+} from '../actions/doctorActions';
 
 const initialState = {
   doctors: [],
@@ -6,52 +13,57 @@ const initialState = {
   error: null
 };
 
-export const doctorReducer = (state = initialState, action) => {
+export default function doctorReducer(state = initialState, action) {
   switch (action.type) {
-    case DOCTOR_TYPES.FETCH_DOCTORS:
+    case FETCH_DOCTORS:
       return {
         ...state,
         doctors: action.payload,
-        loading: false
+        loading: false,
+        error: null
       };
 
-    case DOCTOR_TYPES.ADD_DOCTOR:
+    case ADD_DOCTOR:
       return {
         ...state,
         doctors: [...state.doctors, action.payload],
-        loading: false
+        loading: false,
+        error: null
       };
 
-    case DOCTOR_TYPES.UPDATE_DOCTOR:
+    case UPDATE_DOCTOR:
       return {
         ...state,
         doctors: state.doctors.map(doctor => 
           doctor.id === action.payload.id ? action.payload : doctor
         ),
-        loading: false
+        loading: false,
+        error: null
       };
 
-    case DOCTOR_TYPES.DELETE_DOCTOR:
+    case DELETE_DOCTOR:
       return {
         ...state,
         doctors: state.doctors.filter(doctor => doctor.id !== action.payload),
-        loading: false
+        loading: false,
+        error: null
       };
 
-    case DOCTOR_TYPES.SET_LOADING:
+    case SET_LOADING:
       return {
         ...state,
-        loading: action.payload
+        loading: action.payload,
+        error: null
       };
 
-    case DOCTOR_TYPES.SET_ERROR:
+    case SET_ERROR:
       return {
         ...state,
-        error: action.payload,
-        loading: false
+        loading: false,
+        error: action.payload
       };
 
     default:
       return state;
   }
-}; 
+} 
