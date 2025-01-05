@@ -21,4 +21,6 @@ export const SET_SELECTED_CONTACT = 'SET_SELECTED_CONTACT';
 export const FETCH_ROOMS = 'FETCH_ROOMS';
 export const ADD_ROOM = 'ADD_ROOM';
 export const UPDATE_ROOM = 'UPDATE_ROOM';
-export const DELETE_ROOM = 'DELETE_ROOM'; 
+export const DELETE_ROOM = 'DELETE_ROOM';
+export const SET_LOADING = 'SET_LOADING';
+export const SET_ERROR = 'SET_ERROR'; 

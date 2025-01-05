@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import {
   FaAngleLeft,
   FaSignOutAlt,
+  FaAngleDown,
+  FaAngleUp
 } from 'react-icons/fa';
 import { useState } from 'react';
 import { HiMenu, HiX } from "react-icons/hi";
@@ -13,6 +15,14 @@ import navLinks from './navLinks';
 const Sidebar = () => {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [expandedLinks, setExpandedLinks] = useState({});
+
+  const toggleSubLinks = (href) => {
+    setExpandedLinks(prev => ({
+      ...prev,
+      [href]: !prev[href]
+    }));
+  };
 
   return (
     <>
@@ -35,8 +45,6 @@ const Sidebar = () => {
       )
       }
       
-
-
       {/* Sidebar */}
       <div
         className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg flex flex-col items-start border-r border-blue-200 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-64"
@@ -64,22 +72,62 @@ const Sidebar = () => {
         {/* Navigation Links */}
         <nav className="flex flex-col space-y-2 my-4 w-full overflow-y-auto hide-scrollbar">
           {navLinks.map((link) => (
-            <Link
-              href={link.href}
-              key={link.href}
-              className={`flex items-center p-4 w-full ${pathname === link.href
-                ? 'bg-blue-100'
-                : 'text-gray-500 hover:text-[#3497F9]'
-                }`}
-              style={{
-                color: pathname === link.href ? '#3497F9' : '',
-                borderLeft: pathname === link.href ? '4px solid #3497F9' : '',
-              }}
-              onClick={() => setIsSidebarOpen(false)}
-            >
-              <link.icon className="text-xl mr-3" />
-              <span>{link.label}</span>
-            </Link>
+            <div key={link.href}>
+              <Link
+                href={link.subLinks ? "#" : link.href}
+                className={`flex items-center justify-between p-4 w-full ${pathname === link.href
+                  ? 'bg-blue-100'
+                  : 'text-gray-500 hover:text-[#3497F9]'
+                  }`}
+                style={{
+                  color: pathname === link.href ? '#3497F9' : '',
+                  borderLeft: pathname === link.href ? '4px solid #3497F9' : '',
+                }}
+                onClick={(e) => {
+                  if (link.subLinks) {
+                    e.preventDefault();
+                    toggleSubLinks(link.href);
+                  } else {
+                    setIsSidebarOpen(false);
+                  }
+                }}
+              >
+                <div className="flex items-center">
+                  <link.icon className="text-xl mr-3" />
+                  <span>{link.label}</span>
+                </div>
+                {link.subLinks && (
+                  <div className="ml-2">
+                    {expandedLinks[link.href] ? (
+                      <FaAngleUp className="text-lg" />
+                    ) : (
+                      <FaAngleDown className="text-lg" />
+                    )}
+                  </div>
+                )}
+              </Link>
+              
+              {/* Sub Links */}
+              {link.subLinks && expandedLinks[link.href] && (
+                <div className="ml-8">
+                  {link.subLinks.map((subLink) => (
+                    <Link
+                      key={subLink.href}
+                      href={subLink.href}
+                      className={`flex items-center p-3 w-full ${
+                        pathname === subLink.href
+                          ? 'bg-blue-100 text-[#3497F9]'
+                          : 'text-gray-500 hover:text-[#3497F9]'
+                      }`}
+                      onClick={() => setIsSidebarOpen(false)}
+                    >
+                      <subLink.icon className="text-lg mr-2" />
+                      <span className="text-sm">{subLink.label}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
           ))}
         </nav>
 

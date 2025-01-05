@@ -14,6 +14,7 @@ import {
   setLoading,
   setError 
 } from '@/redux/actions/doctorActions';
+import MedicalLoading from '@/Components/Custom/MedicalLoading';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -96,7 +97,11 @@ export default function DoctorsPage() {
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  if (loading) return (
+    <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+      <MedicalLoading />
+    </div>
+  );
   if (error) return <div className="flex justify-center items-center min-h-screen text-red-500">Error: {error}</div>;
 
   return (

@@ -2,7 +2,9 @@ import {
   FETCH_PATIENTS, 
   ADD_PATIENT, 
   UPDATE_PATIENT, 
-  DELETE_PATIENT 
+  DELETE_PATIENT, 
+  SET_LOADING, 
+  SET_ERROR 
 } from './types';
 
 // Fetch all patients
@@ -24,9 +26,19 @@ export const updatePatient = (patient) => ({
 });
 
 // Delete a patient
-export const deletePatient = (id) => ({
+export const deletePatient = (patientId) => ({
   type: DELETE_PATIENT,
-  payload: id
+  payload: patientId
+});
+
+export const setLoading = (status) => ({
+  type: SET_LOADING,
+  payload: status
+});
+
+export const setError = (error) => ({
+  type: SET_ERROR,
+  payload: error
 });
 
 // Example of an async action without thunk

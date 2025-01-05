@@ -1,13 +1,16 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
+import { useSelector } from 'react-redux';
 
 export default function AddRoomModal({ isOpen, onClose, onSubmit, initialData }) {
+  const doctors = useSelector(state => state.doctors.doctors);
   const [roomData, setRoomData] = useState({
     nom: '',
     type: '',
     capacity: '',
-    availability: true
+    availability: true,
+    doctorId: null
   });
 
   useEffect(() => {
@@ -18,19 +21,25 @@ export default function AddRoomModal({ isOpen, onClose, onSubmit, initialData })
         nom: '',
         type: '',
         capacity: '',
-        availability: true
+        availability: true,
+        doctorId: null
       });
     }
-  }, [initialData]);
+  }, [initialData, isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({
-      ...roomData,
+    
+    const formattedData = {
+      ...(initialData?.id && { id: initialData.id }),
+      nom: roomData.nom,
+      type: roomData.type,
       capacity: parseInt(roomData.capacity),
-      id: roomData.id || Date.now()
-    });
-    onClose();
+      availability: roomData.availability,
+      doctorId: roomData.doctorId || null
+    };
+
+    onSubmit(formattedData);
   };
 
   if (!isOpen) return null;
@@ -111,6 +120,24 @@ export default function AddRoomModal({ isOpen, onClose, onSubmit, initialData })
             </label>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Assigned Doctor
+            </label>
+            <select
+              value={roomData.doctorId || ''}
+              onChange={(e) => setRoomData({ ...roomData, doctorId: e.target.value || null })}
+              className="form-input"
+            >
+              <option value="">No doctor assigned</option>
+              {doctors.map(doctor => (
+                <option key={doctor.id} value={doctor.id}>
+                  {doctor.nom}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
@@ -130,4 +157,4 @@ export default function AddRoomModal({ isOpen, onClose, onSubmit, initialData })
       </div>
     </div>
   );
-} 
+}

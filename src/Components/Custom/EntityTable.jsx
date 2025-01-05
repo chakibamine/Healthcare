@@ -2,19 +2,17 @@
 import { useState } from "react";
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 
-export default function EntityTable({ data , columns, title, onEdit, onDelete }) {
+export default function EntityTable({ data, columns, title, onEdit, onDelete }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const rowsPerPage = 5;
 
-  // Filter data based on search
   const filteredData = data?.filter(item =>
     Object.values(item).some(value => 
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   ) || [];
 
-  // Pagination calculations
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + rowsPerPage);
@@ -25,11 +23,6 @@ export default function EntityTable({ data , columns, title, onEdit, onDelete })
 
   const goToNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
-  };
-
-  const handleEdit = (item) => {
-    console.log('Editing item:', item);
-    onEdit(item);
   };
 
   return (
@@ -46,7 +39,6 @@ export default function EntityTable({ data , columns, title, onEdit, onDelete })
               className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-64 text-sm"
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            
           </div>
         </div>
       </div>
@@ -64,8 +56,8 @@ export default function EntityTable({ data , columns, title, onEdit, onDelete })
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((item, index) => (
-              <tr key={index}>
+            {paginatedData.map((item) => (
+              <tr key={item.id}>
                 {columns.map((col) => (
                   <td key={col.key} className="p-4 border-b">
                     {col.render ? col.render(item[col.key]) : item[col.key]}
@@ -74,16 +66,16 @@ export default function EntityTable({ data , columns, title, onEdit, onDelete })
                 <td className="p-4 border-b">
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleEdit(item)}
+                      onClick={() => onEdit(item)}
                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                      title="Modifier"
+                      title="Edit"
                     >
                       <FiEdit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => onDelete(item.id)}
                       className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                      title="Supprimer"
+                      title="Delete"
                     >
                       <FiTrash2 className="w-4 h-4" />
                     </button>

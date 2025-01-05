@@ -2,7 +2,9 @@ import {
   FETCH_ROOMS, 
   ADD_ROOM, 
   UPDATE_ROOM, 
-  DELETE_ROOM 
+  DELETE_ROOM, 
+  SET_LOADING, 
+  SET_ERROR 
 } from './types';
 
 export const fetchRooms = (rooms) => ({
@@ -20,7 +22,17 @@ export const updateRoom = (room) => ({
   payload: room
 });
 
-export const deleteRoom = (id) => ({
+export const deleteRoom = (roomId) => ({
   type: DELETE_ROOM,
-  payload: id
+  payload: roomId
+});
+
+export const setLoading = (status) => ({
+  type: SET_LOADING,
+  payload: status
+});
+
+export const setError = (error) => ({
+  type: SET_ERROR,
+  payload: error
 }); 

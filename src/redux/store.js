@@ -1,9 +1,12 @@
 import { createStore, combineReducers } from 'redux';
 import doctorReducer from './reducers/doctorReducer';
+import roomReducer from './reducers/roomReducer';
+import patientReducer from './reducers/patientReducer';
 
 const rootReducer = combineReducers({
   doctors: doctorReducer,
-  // other reducers...
+  rooms: roomReducer,
+  patients: patientReducer
 });
 
 const store = createStore(
