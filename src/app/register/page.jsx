@@ -2,17 +2,26 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiBriefcase, FiStar, FiClock } from 'react-icons/fi';
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
+  const [userType, setUserType] = useState('doctor'); // 'doctor' or 'secretary'
   const [formData, setFormData] = useState({
-    name: '',
+    nom: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    // Doctor specific fields
+    specialite: '',
+    experience: '',
+    rating: 5.0,
+    // Secretary specific fields
+    shiftHours: ''
   });
+  
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -23,9 +32,46 @@ export default function RegisterPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    router.push('/login');
+    
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords don't match!");
+      return;
+    }
+
+    try {
+      const dataToSend = {
+        nom: formData.nom,
+        email: formData.email,
+        password: formData.password,
+        ...(userType === 'doctor' ? {
+          specialite: formData.specialite,
+          experience: parseInt(formData.experience),
+          rating: 5.0 // Default rating for new doctors
+        } : {
+          shiftHours: formData.shiftHours
+        })
+      };
+
+      const response = await axios.post(
+        `http://localhost:5167/api/${userType === 'doctor' ? 'Doctors' : 'Secretaries'}`,
+        dataToSend,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      if (response.status === 200 || response.status === 201) {
+        router.push('/');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert('Registration failed: ' + (error.response?.data?.message || error.message));
+    }
   };
 
   return (
@@ -50,12 +96,36 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right Side - Registration Form */}
       <div className="flex-1 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-gray-50 overflow-y-auto">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
             <h2 className="text-4xl font-bold text-gray-900 mb-2">Create Account</h2>
-            <p className="text-gray-600">Join us and start managing your healthcare</p>
+            <p className="text-gray-600">Join us as a healthcare professional</p>
+          </div>
+
+          <div className="flex justify-center space-x-4 mb-6">
+            <button
+              type="button"
+              onClick={() => setUserType('doctor')}
+              className={`px-6 py-2 rounded-lg ${
+                userType === 'doctor' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              Doctor
+            </button>
+            <button
+              type="button"
+              onClick={() => setUserType('secretary')}
+              className={`px-6 py-2 rounded-lg ${
+                userType === 'secretary' 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-100 text-gray-600'
+              }`}
+            >
+              Secretary
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-6">
@@ -65,11 +135,11 @@ export default function RegisterPage() {
                 <div className="relative">
                   <FiUser className="absolute top-3 left-3 text-gray-400" />
                   <input
-                    name="name"
+                    name="nom"
                     type="text"
-                    value={formData.name}
+                    value={formData.nom}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ease-in-out text-black placeholder-gray-500"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your full name"
                     required
                   />
@@ -85,12 +155,66 @@ export default function RegisterPage() {
                     type="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ease-in-out text-black placeholder-gray-500"
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Enter your email"
                     required
                   />
                 </div>
               </div>
+
+              {userType === 'doctor' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Speciality</label>
+                    <div className="relative">
+                      <FiBriefcase className="absolute top-3 left-3 text-gray-400" />
+                      <input
+                        name="specialite"
+                        type="text"
+                        value={formData.specialite}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Enter your speciality"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Years of Experience</label>
+                    <div className="relative">
+                      <FiStar className="absolute top-3 left-3 text-gray-400" />
+                      <input
+                        name="experience"
+                        type="number"
+                        value={formData.experience}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Years of experience"
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {userType === 'secretary' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Shift Hours</label>
+                  <div className="relative">
+                    <FiClock className="absolute top-3 left-3 text-gray-400" />
+                    <input
+                      name="shiftHours"
+                      type="text"
+                      value={formData.shiftHours}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="e.g., 9:00 AM - 5:00 PM"
+                      required
+                    />
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
@@ -101,7 +225,7 @@ export default function RegisterPage() {
                     type={showPassword ? "text" : "password"}
                     value={formData.password}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ease-in-out text-black placeholder-gray-500"
+                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Create a password"
                     required
                   />
@@ -124,26 +248,12 @@ export default function RegisterPage() {
                     type={showPassword ? "text" : "password"}
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ease-in-out text-black placeholder-gray-500"
+                    className="w-full pl-10 pr-12 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="Confirm your password"
                     required
                   />
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                required
-              />
-              <label className="ml-2 text-sm text-gray-600">
-                I agree to the{' '}
-                <a href="#" className="text-blue-600 hover:text-blue-800 hover:underline">Terms of Service</a>
-                {' '}and{' '}
-                <a href="#" className="text-blue-600 hover:text-blue-800 hover:underline">Privacy Policy</a>
-              </label>
             </div>
 
             <button
@@ -152,27 +262,6 @@ export default function RegisterPage() {
             >
               Create Account
             </button>
-
-            {/* <div className="relative my-6">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-50 text-gray-500">Or register with</span>
-              </div>
-            </div> */}
-
-            {/* <div className="grid grid-cols-3 gap-3">
-              <button className="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                <Image src="/google.svg" alt="Google" width={20} height={20} />
-              </button>
-              <button className="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                <Image src="/apple.svg" alt="Apple" width={20} height={20} />
-              </button>
-              <button className="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-                <Image src="/facebook.svg" alt="Facebook" width={20} height={20} />
-              </button>
-            </div> */}
 
             <p className="text-center text-sm text-gray-600">
               Already have an account?{' '}

@@ -1,7 +1,10 @@
 "use client";
 import Link from 'next/link';
 import Image from "next/image";
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '@/redux/actions/authActions';
+import axios from 'axios';
 import {
   FaAngleLeft,
   FaSignOutAlt,
@@ -11,11 +14,35 @@ import {
 import { useState } from 'react';
 import { HiMenu, HiX } from "react-icons/hi";
 import navLinks from './navLinks';
+import Cookies from 'js-cookie';
 
 const Sidebar = () => {
   const pathname = usePathname();
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const { role } = useSelector(state => state.auth);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [expandedLinks, setExpandedLinks] = useState({});
+
+  // Filter links based on user role
+  const filteredNavLinks = navLinks.filter(link => link.roles.includes(role));
+
+  const handleLogout = () => {
+    // Remove cookie
+    Cookies.remove('token');
+    
+    // Dispatch logout action
+    dispatch(logout());
+    
+    // Remove axios default header
+    delete axios.defaults.headers.common['Authorization'];
+    
+    // Close sidebar on mobile
+    setIsSidebarOpen(false);
+    
+    // Redirect to login page
+    router.push('/');
+  };
 
   const toggleSubLinks = (href) => {
     setExpandedLinks(prev => ({
@@ -66,12 +93,12 @@ const Sidebar = () => {
             height={38}
             priority
           />
-          <span className="text-xl font-bold text-blue-600">Hospital</span>
+          <span className="text-xl font-bold text-blue-600"></span>
         </div>
 
         {/* Navigation Links */}
         <nav className="flex flex-col space-y-2 my-4 w-full overflow-y-auto hide-scrollbar">
-          {navLinks.map((link) => (
+          {filteredNavLinks.map((link) => (
             <div key={link.href}>
               <Link
                 href={link.subLinks ? "#" : link.href}
@@ -133,14 +160,13 @@ const Sidebar = () => {
 
         {/* Logout Button */}
         <div className="mt-auto w-full p-4">
-          <Link
-            href="/logout"
-            className="flex items-center text-gray-500 hover:text-blue-500 space-x-2"
-            onClick={() => setIsSidebarOpen(false)}
+          <button
+            onClick={handleLogout}
+            className="flex items-center text-gray-500 hover:text-blue-500 space-x-2 w-full"
           >
             <FaSignOutAlt className="text-xl" />
             <span>Logout</span>
-          </Link>
+          </button>
         </div>
       </div>
 

@@ -1,23 +1,88 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import { FiMail, FiLock, FiEye, FiEyeOff, FiX } from 'react-icons/fi';
 import Link from 'next/link';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginSuccess, loginFailure, logout, setLoading } from '@/redux/actions/authActions';
+import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const dispatch = useDispatch();
+  
+  const { error, loading, isAuthenticated, role } = useSelector(state => state.auth);
+  console.log('auth : ',isAuthenticated,role);
+  
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (isAuthenticated && role) {
+      router.push('/Dashboard');
+    }
+  }, [isAuthenticated, role, router]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    router.push('/Dashboard');
+    dispatch(setLoading(true));
+    
+    try {
+      const response = await axios.post('http://localhost:5167/api/Auth/login', {
+        email,
+        password
+      });
+
+      if (response.data.token) {
+        // Set cookie for middleware
+        Cookies.set('token', response.data.token);
+        
+        // Configure axios defaults
+        axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        
+        // Dispatch success action
+        dispatch(loginSuccess(response.data));
+
+        // Navigate to dashboard
+        router.push('/Dashboard');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      dispatch(loginFailure(error.response?.data?.message || 'An error occurred'));
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   return (
     <div className="h-screen flex overflow-hidden">
+      {/* Error Toast */}
+      {error && (
+        <div className="fixed top-4 right-4 z-50 animate-slideIn">
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-lg flex items-center justify-between max-w-md">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => dispatch(loginFailure(null))}
+              className="ml-4 flex-shrink-0 text-red-400 hover:text-red-600 transition-colors duration-200"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-tr from-blue-600 to-blue-900 text-white flex-col justify-between relative">
         <div className="absolute inset-0 bg-pattern opacity-10"></div>
         <div className="relative h-full w-full">
@@ -101,9 +166,12 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 ease-in-out transform hover:scale-[1.02]"
+              disabled={loading}
+              className={`w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 ease-in-out transform hover:scale-[1.02] ${
+                loading ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
             >
-              Sign in
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
 
             {/* <div className="relative my-6">

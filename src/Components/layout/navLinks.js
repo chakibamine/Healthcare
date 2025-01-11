@@ -18,49 +18,88 @@ import {
 } from "react-icons/fa";
 
 const navLinks = [
-  // Dashboard
-  { href: '/Dashboard', label: 'Dashboard', icon: AiFillDashboard },
-  
-  // Gestion des Salles
-  { href: '/Dashboard/rooms', label: 'Salles', icon: FaHospital },
-  
-  // Personnel Medical
-  {
-    href: '/Dashboard/medical-staff',
-    label: 'Personnel Medical',
-    icon: FaUserMd,
-    subLinks: [
-      { href: '/Dashboard/medical-staff/doctors', label: 'Docteurs', icon: FaUserMd },
-      { href: '/Dashboard/medical-staff/secretaries', label: 'Secrétaires', icon: FaUserNurse },
-      { href: '/Dashboard/medical-staff/medicine-manager', label: 'Responsable Médicaments', icon: FaUserTie },
-    ]
+  // Dashboard - visible to all
+  { 
+    href: '/Dashboard', 
+    label: 'Dashboard', 
+    icon: AiFillDashboard,
+    roles: ['Doctor', 'Secretary'] 
   },
   
-  // Gestion des Patients
-  { href: '/Dashboard/patients', label: 'Patients', icon: FaUserInjured },
+  // Gestion des Salles - visible to all
+  { 
+    href: '/Dashboard/rooms', 
+    label: 'Salles', 
+    icon: FaHospital,
+    roles: ['Doctor', 'Secretary']
+  },
+
+  { 
+    href: '/Dashboard/medical-staff/doctors', 
+    label: 'Docteurs', 
+    icon: FaUserMd, 
+    roles: ['Doctor']
+  },
+  // Personnel Medical - only visible to doctors
+  // {
+  //   href: '/Dashboard/medical-staff',
+  //   label: 'Personnel Medical',
+  //   icon: FaUserMd,
+  //   roles: ['Doctor'],
+  //   subLinks: [
+  //     { href: '/Dashboard/medical-staff/doctors', label: 'Docteurs', icon: FaUserMd },
+  //     { href: '/Dashboard/medical-staff/secretaries', label: 'Secrétaires', icon: FaUserNurse },
+  //     //{ href: '/Dashboard/medical-staff/medicine-manager', label: 'Responsable Médicaments', icon: FaUserTie },
+  //   ]
+  // },
   
-  // Rendez-vous
-  { href: '/Dashboard/appointments', label: 'Rendez-vous', icon: FaCalendar },
+  // Gestion des Patients - visible to all
+  { 
+    href: '/Dashboard/patients', 
+    label: 'Patients', 
+    icon: FaUserInjured,
+    roles: ['Doctor', 'Secretary']
+  },
   
-  // Traitements
-  { href: '/Dashboard/treatments', label: 'Traitements', icon: FaNotesMedical },
+  // Rendez-vous - visible to all
+  { 
+    href: '/Dashboard/appointments', 
+    label: 'Rendez-vous', 
+    icon: FaCalendar,
+    roles: ['Doctor', 'Secretary', 'Patient']
+  },
   
-  // Gestion des Médicaments
-  {
-    href: '/Dashboard/medicine',
-    label: 'Médicaments',
+  // Traitements - only visible to doctors
+  { 
+    href: '/Dashboard/treatments', 
+    label: 'Traitements', 
+    icon: FaNotesMedical,
+    roles: ['Doctor']
+  },
+
+  // Stock Médicaments - only visible to doctors
+  { 
+    href: '/Dashboard/medicine/stock', 
+    label: 'Stock Médicaments', 
     icon: FaPills,
-    subLinks: [
-      { href: '/Dashboard/medicine/stock', label: 'Stock Médicaments', icon: FaWarehouse },
-      { href: '/Dashboard/medicine/inventory', label: 'Inventaire', icon: FaClipboardList },
-    ]
+    roles: ['Doctor']
   },
   
-  // Communication
-  { href: '/Dashboard/messages', label: 'Messages', icon: FaEnvelope },
+  // Messages - visible to all
+  { 
+    href: '/Dashboard/messages', 
+    label: 'Messages', 
+    icon: FaEnvelope,
+    roles: ['Doctor', 'Secretary', 'Patient']
+  },
   
-  // Administration
-  { href: '/Dashboard/settings', label: 'Paramètres', icon: FaCog },
+  // Administration - only visible to doctors
+  // { 
+  //   href: '/Dashboard/settings', 
+  //   label: 'Paramètres', 
+  //   icon: FaCog,
+  //   roles: ['Doctor']
+  // },
 ];
 
 export default navLinks;

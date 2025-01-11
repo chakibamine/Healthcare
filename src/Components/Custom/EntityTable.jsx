@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { FiEdit2, FiTrash2 } from 'react-icons/fi';
 
-export default function EntityTable({ data, columns, title, onEdit, onDelete }) {
+export default function EntityTable({ data, columns, title, onEdit, onDelete,hide }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const rowsPerPage = 5;
@@ -52,7 +52,7 @@ export default function EntityTable({ data, columns, title, onEdit, onDelete }) 
                   {col.title}
                 </th>
               ))}
-              <th className="p-4 border-y bg-slate-50">Actions</th>
+              {hide ?? <th className="p-4 border-y bg-slate-50">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -63,7 +63,7 @@ export default function EntityTable({ data, columns, title, onEdit, onDelete }) 
                     {col.render ? col.render(item[col.key]) : item[col.key]}
                   </td>
                 ))}
-                <td className="p-4 border-b">
+                {hide ??<td className="p-4 border-b">
                   <div className="flex gap-2">
                     <button
                       onClick={() => onEdit(item)}
@@ -80,7 +80,7 @@ export default function EntityTable({ data, columns, title, onEdit, onDelete }) 
                       <FiTrash2 className="w-4 h-4" />
                     </button>
                   </div>
-                </td>
+                </td>}
               </tr>
             ))}
           </tbody>

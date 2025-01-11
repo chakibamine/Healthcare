@@ -1,42 +1,51 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ChatSidebar from "@/Components/Chat/ChatSidebar";
 import ChatMain from "@/Components/Chat/ChatMain";
-
-const contacts = [
-  { 
-    id: 1, 
-    name: "Elizabeth Polson", 
-    avatar: "https://ui-avatars.com/api/?name=Elizabeth+Polson&background=random",
-    lastMessage: "Hi I need to meet Dr. Joel Tomorrow Urgently", 
-    messages: [
-      { id: 1, text: "Hi I need to meet Dr. Joel Tomorrow Urgently", sender: "other", timestamp: "11:30 AM" },
-      { id: 2, text: "Please arrange appointment.", sender: "other", timestamp: "11:30 AM" },
-    ]
-  },
-  { 
-    id: 2, 
-    name: "Dr. Joel Thompson", 
-    avatar: "https://ui-avatars.com/api/?name=Joel+Thompson&background=random",
-    lastMessage: "I'll check the schedule", 
-    messages: [
-      { id: 1, text: "Good morning!", sender: "other", timestamp: "9:30 AM" },
-      { id: 2, text: "I'll check the schedule", sender: "other", timestamp: "9:31 AM" },
-    ]
-  },
-];
+import { useSelector } from "react-redux";
+import axios from "axios";
 
 export default function MessagesPage() {
-  const [selectedContact, setSelectedContact] = useState(contacts[0]);
+  const [contacts, setContacts] = useState([]);
+  const [selectedContact, setSelectedContact] = useState(null);
+  const { role, userId } = useSelector((state) => state.auth);
+
+  console.log("auth :", userId, role);
+  let role1 = role === "Doctor" ? "doctor" : "patient";
+
+  useEffect(() => {
+    if (userId && role) {
+      axios
+        .get(`http://localhost:5167/api/chat/contacts/${userId}?role=${role1}`)
+        .then((response) => {
+          const fetchedContacts = response.data;
+          setContacts(fetchedContacts);
+          console.log("contacts:", fetchedContacts);
+
+          if (fetchedContacts.length > 0) {
+            setSelectedContact(fetchedContacts[0]); // Select the first contact by default
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching contacts:", error);
+        });
+    }
+  }, [userId]); // Include userId as a dependency
 
   return (
     <div className="flex h-[calc(100vh-2rem)] bg-white shadow-lg rounded-lg overflow-hidden">
       <ChatSidebar 
         contacts={contacts} 
-        onSelectContact={setSelectedContact}
+        onSelectContact={(contact) => setSelectedContact(contact)} // Pass function to update the selected contact
         selectedContact={selectedContact}
       />
-      <ChatMain selectedContact={selectedContact} />
+      {selectedContact ? (
+        <ChatMain selectedContact={selectedContact} />
+      ) : (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500">Select a contact to start chatting</p>
+        </div>
+      )}
     </div>
   );
-} 
+}

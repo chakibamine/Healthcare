@@ -7,7 +7,8 @@ export default function AddPatientModal({ isOpen, onClose, onSubmit, initialData
     nom: '',
     adresse: '',
     phoneNumber: '',
-    email: ''
+    email: '',
+    password: ''
   });
 
   useEffect(() => {
@@ -18,7 +19,8 @@ export default function AddPatientModal({ isOpen, onClose, onSubmit, initialData
         nom: '',
         adresse: '',
         phoneNumber: '',
-        email: ''
+        email: '',
+        password: ''
       });
     }
   }, [initialData, isOpen]);
@@ -109,6 +111,20 @@ export default function AddPatientModal({ isOpen, onClose, onSubmit, initialData
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              type="password"
+              required
+              value={patientData.password}
+              onChange={(e) => setPatientData({ ...patientData, password: e.target.value })}
+              className="form-input"
+              placeholder="Enter password"
+            />
+          </div>
+
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
@@ -128,4 +144,4 @@ export default function AddPatientModal({ isOpen, onClose, onSubmit, initialData
       </div>
     </div>
   );
-} 
+}

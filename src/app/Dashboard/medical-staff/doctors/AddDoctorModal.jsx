@@ -2,39 +2,50 @@
 import { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 
-export default function AddDoctorModal({ isOpen, onClose, onSubmit, initialData }) {
+export default function DoctorModal({ isOpen, onClose, onSubmit, initialData }) {
+  // Initialize state with default values
   const [doctorData, setDoctorData] = useState({
     nom: '',
     specialite: '',
     experience: '',
-    rating: ''
+    rating: '',
+    Email: ''
   });
 
   // Reset form when modal opens/closes or initialData changes
   useEffect(() => {
     if (initialData) {
-      setDoctorData(initialData);
+      // If initialData is provided, use it to pre-fill the form
+      setDoctorData({
+        nom: initialData.nom || '',
+        specialite: initialData.specialite || '',
+        experience: initialData.experience || '',
+        rating: initialData.rating || '',
+        Email: initialData.Email || ''
+      });
     } else {
+      // If no initialData, reset the form to default values
       setDoctorData({
         nom: '',
         specialite: '',
         experience: '',
-        rating: ''
+        rating: '',
+        Email: ''
       });
     }
   }, [initialData, isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Create the formatted doctor data from the state
     const formattedData = {
-      // If editing, include the id first
-      ...(initialData?.id && { id: initialData.id }),
+      ...(initialData?.id && { id: initialData.id }), // Include ID if editing
       nom: doctorData.nom,
       specialite: doctorData.specialite,
       experience: parseInt(doctorData.experience, 10),
-      rating: parseFloat(doctorData.rating)
+      rating: parseFloat(doctorData.rating),
+      Email: doctorData.Email
     };
 
     // Submit the formatted data
@@ -72,7 +83,19 @@ export default function AddDoctorModal({ isOpen, onClose, onSubmit, initialData 
               placeholder="Enter doctor's name"
             />
           </div>
-
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              required
+              value={doctorData.Email}
+              onChange={(e) => setDoctorData({ ...doctorData, Email: e.target.value })}
+              className="form-input"
+              placeholder="Enter doctor's email"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Speciality
@@ -144,4 +167,4 @@ export default function AddDoctorModal({ isOpen, onClose, onSubmit, initialData 
       </div>
     </div>
   );
-} 
+}
