@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
-import { FiPlus } from 'react-icons/fi';
+import { FiPlus, FiFileText } from 'react-icons/fi';
 import AddPrescriptionModal from './AddPrescriptionModal';
 import ConfirmationModal from '@/Components/Custom/ConfirmationModal';
 import { 
@@ -11,6 +11,7 @@ import {
   updatePrescription, 
   deletePrescription 
 } from '@/redux/actions/prescriptionActions';
+import { generatePrescriptionPDF } from './OrdonnancePDF';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -188,6 +189,21 @@ Get well soon! 🌟`;
                       className="text-red-600 hover:text-red-900"
                     >
                       Delete
+                    </button>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const medicalRecord = await axios.get(`${API_URL}/MedicalRecords/${prescription.medicalRecordId}`);
+                          await generatePrescriptionPDF(prescription, medicalRecord.data);
+                        } catch (error) {
+                          console.error('Error generating prescription:', error);
+                          alert('Failed to generate prescription');
+                        }
+                      }}
+                      className="text-gray-600 hover:text-gray-900"
+                      title="Print Prescription"
+                    >
+                      <FiFileText className="w-5 h-5" />
                     </button>
                   </td>
                 </tr>
