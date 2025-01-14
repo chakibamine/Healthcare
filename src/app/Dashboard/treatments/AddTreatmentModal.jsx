@@ -2,34 +2,32 @@
 import { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
+import axios from 'axios';
 
 export default function AddTreatmentModal({ isOpen, onClose, onSubmit, initialData }) {
-  const { doctors } = useSelector(state => state.doctors || { doctors: [] });
-  const { patients } = useSelector(state => state.patients || { patients: [] });
-  const { appointments } = useSelector(state => state.appointments || { appointments: [] });
+  const { doctors } = useSelector(state => state.doctors);
+  const { patients } = useSelector(state => state.patients);
+  const { appointments } = useSelector(state => state.appointments);
+  const [appointmentsList, setAppointmentsList] = useState([]);
+  const [medicalRecords, setMedicalRecords] = useState([]);
 
   const [treatmentData, setTreatmentData] = useState({
     diagnosis: '',
-    patientId: '',
-    doctorId: '',
     date: new Date().toISOString().split('T')[0],
-    appointmentId: '',
-    notes: ''
   });
   
   useEffect(() => {
     if (initialData) {
-      const appointment = appointments.find(a => a.id === initialData.appointmentId);
-      
       setTreatmentData({
-        ...initialData,
-        date: appointment ? new Date(appointment.date).toISOString().split('T')[0] 
-                        : new Date().toISOString().split('T')[0],
-        patientId: appointment?.patientId || '',
-        doctorId: appointment?.doctorId || '',
-        appointmentId: initialData.appointmentId || '',
+        id: initialData.id,
         diagnosis: initialData.diagnosis || '',
-        notes: initialData.notes || ''
+        patientId: initialData.patientId?.toString() || '',
+        doctorId: initialData.doctorId?.toString() || '',
+        date: initialData.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        appointmentId: initialData.appointmentId?.toString() || '',
+        notes: initialData.notes || '',
+        patientName: initialData.patient?.nom || '',
+        doctorName: initialData.doctor?.nom || ''
       });
     } else {
       setTreatmentData({
@@ -38,60 +36,112 @@ export default function AddTreatmentModal({ isOpen, onClose, onSubmit, initialDa
         doctorId: '',
         date: new Date().toISOString().split('T')[0],
         appointmentId: '',
-        notes: ''
+        notes: '',
+        patientName: '',
+        doctorName: ''
       });
     }
-  }, [initialData, appointments]);
+  }, [initialData]);
+
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const response = await axios.get('http://localhost:5167/api/Appointments');
+        const formattedAppointments = response.data.map(appointment => ({
+          ...appointment,
+          date: appointment.date.split('T')[0],
+          time: appointment.heure,
+          status: appointment.statut,
+          doctorId: appointment.doctor.id,
+          patientId: appointment.patient.id,
+          doctorName: appointment.doctor.nom,
+          patientName: appointment.patient.nom
+        }));
+        setAppointmentsList(formattedAppointments);
+      } catch (error) {
+        console.error('Error fetching appointments:', error);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  useEffect(() => {
+    const fetchMedicalRecords = async () => {
+      try {
+        const response = await axios.get('http://localhost:5167/api/MedicalRecords');
+        setMedicalRecords(response.data);
+      } catch (error) {
+        console.error('Error fetching medical records:', error);
+      }
+    };
+
+    fetchMedicalRecords();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Format the data according to the MedicalRecord model
     const formattedData = {
+      ...(initialData?.id && { id: initialData.id }),
       diagnosis: treatmentData.diagnosis,
       date: treatmentData.date,
       patientId: parseInt(treatmentData.patientId),
       doctorId: parseInt(treatmentData.doctorId),
-      notes: treatmentData.notes,
+      appointmentId: parseInt(treatmentData.appointmentId),
+      notes: treatmentData.notes || '',
+      patient: { nom: treatmentData.patientName },
+      doctor: { nom: treatmentData.doctorName }
     };
 
-    console.log('Submitting data:', formattedData);
     onSubmit(formattedData);
   };
 
-  // Get the selected appointment details
-  const selectedAppointment = appointments.find(a => a.id === parseInt(treatmentData.appointmentId));
-  const selectedPatient = patients.find(p => p.id === selectedAppointment?.patientId);
-  const selectedDoctor = doctors.find(d => d.id === selectedAppointment?.doctorId);
+  const selectedAppointment = appointmentsList.find(a => a.id === parseInt(treatmentData.appointmentId));
 
   const getAppointmentDetails = () => {
     if (!selectedAppointment) return '';
-    return `
-      ${selectedAppointment.notes || 'No notes'}`;
+    return `${selectedAppointment.notes || 'No notes'}`;
   };
 
-  // Update notes when appointment changes
   useEffect(() => {
     if (selectedAppointment) {
       setTreatmentData(prev => ({
         ...prev,
         patientId: selectedAppointment.patientId.toString(),
         doctorId: selectedAppointment.doctorId.toString(),
-        date: new Date(selectedAppointment.date).toISOString().split('T')[0],
-        notes: selectedAppointment.notes || ''
+        date: selectedAppointment.date,
+        notes: selectedAppointment.notes || '',
+        patientName: selectedAppointment.patientName || '',
+        doctorName: selectedAppointment.doctorName || ''
       }));
     }
   }, [treatmentData.appointmentId]);
+
+  const getFilteredAppointments = () => {
+    return appointmentsList.filter(appointment => {
+      const appointmentDate = new Date(appointment.date);
+      const today = new Date();
+      
+      if (initialData && appointment.id === initialData.appointmentId) {
+        return true;
+      }
+      
+      const hasTreatment = medicalRecords.some(
+        record => record.appointmentId === appointment.id
+      );
+
+      return appointmentDate <= today && !hasTreatment;
+    });
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {/* Background overlay */}
         <div className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" onClick={onClose} />
 
-        {/* Modal panel */}
         <div className="inline-block w-full max-w-4xl px-6 pt-5 pb-6 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle">
           <div className="absolute top-0 right-0 pt-4 pr-4">
             <button
@@ -113,14 +163,47 @@ export default function AddTreatmentModal({ isOpen, onClose, onSubmit, initialDa
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-6">
-              {/* Left Column */}
               <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-black">
+                    Select Appointment
+                  </label>
+                  <select
+                    value={treatmentData.appointmentId}
+                    onChange={(e) => {
+                      const selectedAppointment = appointmentsList.find(a => a.id === parseInt(e.target.value));
+                      setTreatmentData(prev => ({
+                        ...prev,
+                        appointmentId: e.target.value,
+                        patientId: selectedAppointment?.patientId.toString() || '',
+                        doctorId: selectedAppointment?.doctorId.toString() || '',
+                        date: selectedAppointment?.date || new Date().toISOString().split('T')[0],
+                        patientName: selectedAppointment?.patientName || '',
+                        doctorName: selectedAppointment?.doctorName || ''
+                      }));
+                    }}
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 text-black"
+                    required
+                  >
+                    <option value="">Select an appointment</option>
+                    {getFilteredAppointments().length > 0 ? (
+                      getFilteredAppointments().map((appointment) => (
+                        <option key={appointment.id} value={appointment.id}>
+                          {new Date(appointment.date).toLocaleDateString()} {appointment.time} - {appointment.patientName} with Dr. {appointment.doctorName}
+                        </option>
+                      ))
+                    ) : (
+                      <option value="" disabled>No available appointments without treatments</option>
+                    )}
+                  </select>
+                </div>
+
                 <div>
                   <p className="block text-sm font-medium text-black">
                     Patient
                   </p>
                   <div className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-gray-50 text-black">
-                    {patients.find(p => p.id === parseInt(treatmentData.patientId))?.nom || 'No patient selected'}
+                    {treatmentData.patientName || 'No patient selected'}
                   </div>
                 </div>
 
@@ -129,7 +212,7 @@ export default function AddTreatmentModal({ isOpen, onClose, onSubmit, initialDa
                     Doctor
                   </p>
                   <div className="mt-1 p-2 block w-full rounded-md border border-gray-300 bg-gray-50 text-black">
-                    {doctors.find(d => d.id === parseInt(treatmentData.doctorId))?.nom || 'No doctor selected'}
+                    {treatmentData.doctorName || 'No doctor selected'}
                   </div>
                 </div>
 
@@ -141,27 +224,12 @@ export default function AddTreatmentModal({ isOpen, onClose, onSubmit, initialDa
                     {treatmentData.date ? new Date(treatmentData.date).toLocaleDateString() : 'No date'}
                   </div>
                 </div>
-
-                <div>
-                  <p className="block text-sm font-medium text-black">
-                    Appointment
-                  </p>
-                  <div className="mt-1 p-2 block w-full rounded-md border border-gray-300 text-black">
-                    {selectedAppointment ? 
-                      `${new Date(selectedAppointment.date).toLocaleDateString()} - ${
-                        patients.find(p => p.id === selectedAppointment.patientId)?.nom
-                      }` : 
-                      'No appointment selected'
-                    }
-                  </div>
-                </div>
               </div>
 
-              {/* Right Column */}
               <div className="space-y-6">
                 <div>
                   <p className="block text-sm font-medium text-black">
-                    Notes
+                    Appointment Notes
                   </p>
                   <div className="mt-1 space-y-4">
                     {selectedAppointment && (
@@ -173,10 +241,11 @@ export default function AddTreatmentModal({ isOpen, onClose, onSubmit, initialDa
                 </div>
 
                 <div>
-                  <p className="block text-sm font-medium text-black">
-                    Diagnosis
-                  </p>
+                  <label className="block text-sm font-medium text-black">
+                    Diagnosis *
+                  </label>
                   <textarea
+                    required
                     value={treatmentData.diagnosis}
                     onChange={(e) => setTreatmentData(prev => ({...prev, diagnosis: e.target.value}))}
                     className="mt-1 p-2 block w-full rounded-md border border-gray-300 min-h-[100px] text-black"

@@ -15,6 +15,7 @@ import {
   FaUserNurse,
   FaWarehouse,
   FaUserTie,
+  FaPrescriptionBottleAlt,
 } from "react-icons/fa";
 
 const navLinks = [
@@ -74,6 +75,14 @@ const navLinks = [
     href: '/Dashboard/treatments', 
     label: 'Traitements', 
     icon: FaNotesMedical,
+    roles: ['Doctor']
+  },
+
+  // Add Prescriptions - only visible to doctors
+  { 
+    href: '/Dashboard/prescriptions', 
+    label: 'Ordonnances', 
+    icon: FaPrescriptionBottleAlt,
     roles: ['Doctor']
   },
 

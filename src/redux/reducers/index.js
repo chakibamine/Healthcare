@@ -7,6 +7,7 @@ import roomReducer from './roomReducer';
 import medicamentReducer from './medicamentReducer';
 import treatmentReducer from './treatmentReducer';
 import authReducer from './authReducer';
+import prescriptionReducer from './prescriptionReducer';
 
 export default combineReducers({
   appointments: appointmentReducer,
@@ -16,5 +17,6 @@ export default combineReducers({
   rooms: roomReducer,
   medicament: medicamentReducer,
   treatments: treatmentReducer,
-  auth: authReducer
+  auth: authReducer,
+  prescriptions: prescriptionReducer
 }); 

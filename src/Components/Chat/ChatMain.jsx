@@ -87,6 +87,15 @@ export default function ChatMain({ selectedContact }) {
     }
   }, [selectedContact]);
 
+  // Add this effect to update the last message
+  useEffect(() => {
+    if (messages.length > 0 && selectedContact) {
+      const lastMessage = messages[messages.length - 1];
+      selectedContact.lastMessage = lastMessage.content;
+      selectedContact.lastMessageTimestamp = lastMessage.timestamp;
+    }
+  }, [messages]);
+
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       try {
@@ -117,40 +126,70 @@ export default function ChatMain({ selectedContact }) {
     }
   };
 
+  const formatPrescriptionMessage = (content) => {
+    if (content.startsWith("New Prescription Details")) {
+      const sections = content.split('\n\n');
+      return (
+        <div className="space-y-3">
+          <h3 className="text-lg font-bold">{sections[0]}</h3>
+          {sections.slice(1).map((section, index) => {
+            const [title, ...details] = section.split('\n');
+            return (
+              <div key={index} className="space-y-1">
+                <h4 className="font-semibold">{title.replace('*', '').replace('*', '')}</h4>
+                <div className="pl-4">
+                  {details.join('\n')}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    return content;
+  };
+
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-2rem)] bg-[#f5f7fb]">
+    <div className="flex-1 flex flex-col h-[calc(100vh-2rem)] bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200">
+      <div className="flex items-center justify-between px-8 py-4 bg-white shadow-sm">
         <div className="flex items-center space-x-4">
-          <img
-            src={selectedContact.avatar}
-            alt={selectedContact.name}
-            className="w-10 h-10 rounded-full object-cover"
-          />
+          <div className="relative">
+            <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200">
+              <span className="text-xl font-bold text-white">
+                {selectedContact.otherPartyName.split(' ').slice(0, 2).map(name => name.charAt(0).toUpperCase()).join('')}
+              </span>
+            </div>
+            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
+          </div>
           <div>
-            <h2 className="font-semibold text-gray-800">{selectedContact.name}</h2>
-            <p className="text-xs text-green-500">Online</p>
+            <h2 className="text-xl font-bold text-gray-800">{selectedContact.otherPartyName}</h2>
+            <p className="text-sm text-green-600 font-medium">Active Now</p>
           </div>
         </div>
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-8 space-y-6">
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${message.sender === role ? "justify-end" : "justify-start"}`}
           >
             <div
-              className={`max-w-xl px-4 py-2 rounded-lg shadow-sm ${
+              className={`max-w-xl px-6 py-3 rounded-2xl ${
                 message.sender === role
-                  ? "bg-blue-500 text-white rounded-br-none"
-                  : "bg-white text-gray-800 rounded-bl-none"
-              }`}
+                  ? "bg-blue-600 text-white rounded-br-none shadow-blue-200"
+                  : "bg-white text-gray-800 rounded-bl-none shadow-gray-200"
+              } shadow-lg`}
             >
-              {message.content}
-              <span className="block text-xs mt-1 opacity-70">
-                {message.timestamp ? new Date(message.timestamp).toLocaleTimeString() : ""}
+              {typeof message.content === 'string' && message.content.startsWith("🏥 *New Prescription Details* 🏥") ? (
+                formatPrescriptionMessage(message.content)
+              ) : (
+                <p className="text-base leading-relaxed">{message.content}</p>
+              )}
+              <span className="block text-xs mt-2 opacity-80">
+                {message.timestamp ? new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
               </span>
             </div>
           </div>
@@ -158,18 +197,23 @@ export default function ChatMain({ selectedContact }) {
       </div>
 
       {/* Input Area */}
-      <div className="px-6 py-3 bg-white border-t border-gray-200">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="Type your message..."
-          className="w-full py-2 px-4 bg-gray-100 rounded-full"
-        />
-        <button onClick={handleSendMessage} className="bg-blue-500 text-white p-2 rounded-lg">
-          Send
-        </button>
+      <div className="px-8 py-4 bg-white shadow-lg">
+        <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Type your message..."
+            className="flex-1 py-3 px-6 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all duration-200"
+          />
+          <button 
+            onClick={handleSendMessage} 
+            className="bg-blue-600 text-white px-6 py-3 rounded-full hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2 shadow-lg"
+          >
+            <span>Send</span>
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -33,27 +33,26 @@ export default function ChatSidebar({ contacts, onSelectContact, selectedContact
                 ? "bg-blue-50 border-l-4 border-blue-500"
                 : "hover:bg-gray-50 border-l-4 border-transparent"
             }`}
-            onClick={() => {
-              console.log("Selected contact:", contact); 
-              onSelectContact(contact); 
-            }}
+            onClick={() => onSelectContact(contact)}
           >
             <div className="relative">
-              <img
-                src={contact.avatar}
-                alt={contact.otherPartyName}
-                className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-              />
+              <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center border-2 border-gray-200">
+                <span className="text-xl font-bold text-white">
+                  {contact.otherPartyName.split(' ').slice(0, 2).map(name => name.charAt(0).toUpperCase()).join('')}
+                </span>
+              </div>
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
             </div>
             <div className="ml-4 flex-1">
               <div className="flex justify-between items-baseline">
                 <h2 className="font-semibold text-gray-800">{contact.otherPartyName}</h2>
                 <span className="text-xs text-gray-800">
-                  {formatMessageTime(contact.lastMessageTimestamp)}
+                  {contact.lastMessageTimestamp && formatMessageTime(contact.lastMessageTimestamp)}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 truncate">{contact.lastMessage}</p>
+              <p className="text-sm text-gray-600 truncate">
+                {contact.lastMessage || 'No messages yet'}
+              </p>
             </div>
           </div>
         ))}
