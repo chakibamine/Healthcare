@@ -102,71 +102,74 @@ export default function AppointmentsPage() {
   if (error) return <div className="flex justify-center items-center min-h-screen text-red-500">Error: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-6">
-      <div className="bg-white rounded-xl shadow-sm p-6">
-        <div className="flex justify-end mb-6">
-          <button
-            onClick={() => {
-              setEditingAppointment(null);
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors duration-200"
-          >
-            <FiPlus className="w-4 h-4" />
-            Add Appointment
-          </button>
-        </div>
+    <div className="min-h-screen bg-gray-50/50 p-4 md:p-6">
+      <div className="responsive-container">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 md:p-6">
+            <h1 className="responsive-heading mb-4 md:mb-0">Appointments</h1>
+            <button
+              onClick={() => {
+                setEditingAppointment(null);
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors duration-200"
+            >
+              <FiPlus className="w-4 h-4" />
+              Add Appointment
+            </button>
+          </div>
 
-        <div className="bg-white rounded-lg overflow-hidden">
-          <EntityTable
-            data={appointments}
-            columns={[
-              { key: "id", title: "ID" },
-              { 
-                key: "date", 
-                title: "Date",
-                render: (value) => new Date(value).toLocaleDateString()
-              },
-              { key: "heure", title: "Time" },
-              { 
-                key: "statut", 
-                title: "Status",
-                render: (value) => (
-                  <span className={`px-3 py-1 rounded-full text-sm ${
-                    value === 'Confirmed' ? 'bg-green-50 text-green-700' : 
-                    value === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
-                    value === 'Completed' ? 'bg-blue-50 text-blue-700' :
-                    'bg-red-50 text-red-700'
-                  }`}>
-                    {value}
-                  </span>
-                )
-              },
-              { 
-                key: "patientId", 
-                title: "Patient",
-                render: (value) => {
-                  const patient = patients.find(p => p.id === value);
-                  return patient ? patient.nom : 'Unknown';
-                }
-              },
-              { 
-                key: "doctorId", 
-                title: "Doctor",
-                render: (value) => {
-                  const doctor = doctors.find(d => d.id === value);
-                  return doctor ? doctor.nom : 'Unknown';
-                }
-              },
-              { key: "notes", title: "Notes" }
-            ]}
-            title="Appointment Management"
-            onEdit={(appointment) => {
-              setEditingAppointment(appointment);
-              setIsModalOpen(true);
-            }}
-            onDelete={handleDeleteAppointment}
-          />
+          <div className="responsive-grid p-4 md:p-6">
+            <EntityTable
+              data={appointments}
+              columns={[
+                { key: "id", title: "ID" },
+                { 
+                  key: "date", 
+                  title: "Date",
+                  render: (value) => new Date(value).toLocaleDateString()
+                },
+                { key: "heure", title: "Time" },
+                { 
+                  key: "statut", 
+                  title: "Status",
+                  render: (value) => (
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      value === 'Confirmed' ? 'bg-green-50 text-green-700' : 
+                      value === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
+                      value === 'Completed' ? 'bg-blue-50 text-blue-700' :
+                      'bg-red-50 text-red-700'
+                    }`}>
+                      {value}
+                    </span>
+                  )
+                },
+                { 
+                  key: "patientId", 
+                  title: "Patient",
+                  render: (value) => {
+                    const patient = patients.find(p => p.id === value);
+                    return patient ? patient.nom : 'Unknown';
+                  }
+                },
+                { 
+                  key: "doctorId", 
+                  title: "Doctor",
+                  render: (value) => {
+                    const doctor = doctors.find(d => d.id === value);
+                    return doctor ? doctor.nom : 'Unknown';
+                  }
+                },
+                { key: "notes", title: "Notes" }
+              ]}
+              title="Appointment Management"
+              onEdit={(appointment) => {
+                setEditingAppointment(appointment);
+                setIsModalOpen(true);
+              }}
+              onDelete={handleDeleteAppointment}
+            />
+          </div>
         </div>
       </div>
 

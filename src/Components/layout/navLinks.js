@@ -24,7 +24,8 @@ const navLinks = [
     href: '/Dashboard', 
     label: 'Dashboard', 
     icon: AiFillDashboard,
-    roles: ['Doctor', 'Secretary'] 
+    roles: ['Doctor', 'Secretary'],
+    className: 'flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg'
   },
   
   // Gestion des Salles - visible to all

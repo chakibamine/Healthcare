@@ -4,10 +4,11 @@ import Image from "next/image";
 import { FaAngleDown, FaSignOutAlt } from 'react-icons/fa';
 import { HiX } from "react-icons/hi";
 import navLinks from '../navLinks';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const MobileMenu = ({ isMenuOpen, setIsMenuOpen }) => {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <>
@@ -44,10 +45,16 @@ const MobileMenu = ({ isMenuOpen, setIsMenuOpen }) => {
               <Link
                 href={link.href}
                 key={link.href}
-                className={`flex items-center p-4 rounded-lg text-gray-600 hover:bg-gray-100${
-                  pathname === link.href ? ' bg-blue-100' : ' text-gray-500 hover:text-[#3497F9]'
+                onClick={(e) => {
+                  e.preventDefault();
+                  router.push(link.href);
+                  setIsMenuOpen(false);
+                }}
+                className={`flex items-center p-4 rounded-lg ${
+                  pathname === link.href 
+                    ? 'bg-blue-100 text-blue-500' 
+                    : 'text-gray-500 hover:bg-gray-50'
                 }`}
-                onClick={() => setIsMenuOpen(false)} // Close menu on link click
               >
                 <link.icon className="text-xl mr-3" />
                 <span>{link.label}</span>

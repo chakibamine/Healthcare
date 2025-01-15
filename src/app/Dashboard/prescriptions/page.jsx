@@ -128,24 +128,23 @@ Get well soon! 🌟`;
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-6 space-y-6">
-      <div className="bg-white rounded-xl shadow-sm">
-        <div className="flex justify-between items-center p-6 border-b border-gray-100">
-          <h1 className="text-2xl font-bold text-gray-900">Prescriptions</h1>
+    <div className="min-h-screen bg-gray-50/50 p-4 md:p-6 space-y-6">
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 md:p-6 border-b border-gray-100">
+          <h1 className="text-xl md:text-2xl font-semibold text-gray-900 mb-4 md:mb-0">
+            Prescriptions
+          </h1>
           <button
-            onClick={() => {
-              setEditingPrescription(null);
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-1 px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            onClick={() => setIsModalOpen(true)}
+            className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center"
           >
-            <FiPlus className="w-4 h-4" />
+            <FiPlus className="mr-2" />
             Add Prescription
           </button>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="min-w-full divide-y divide-gray-200">
             <thead>
               <tr className="bg-gray-50/50">
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
